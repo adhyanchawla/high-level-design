@@ -33,3 +33,67 @@
 
     - Things to explore
         - Visibility timeout
+
+
+
+### Message Streams
+
+    - similar to message queues
+
+    Why do we need them?
+    - Lets take an example of medium.com to see the need for this
+    - Lets say a user uploads a blog to medium, Now the API server needs to perform two tasks:
+        - to update elastic search engine with the medium article (index into elastic search)
+        - to update the database by incrementing the count
+    - if we try to solve the problem by dropping the message to message broker and message broker solely takes care of updating the elastic search engine and the DB 
+        - lets say it updated the elastic search engine but failed to update the DB or vice versa
+    - OR if we consider two separate brokers but in that case what if 1 would fail to update
+    - Hence this would lead to inconsistency across the system
+
+    - so we need "WRITE TO ONE" and "READ BY MANY" kind of a semantic. eg Apache kafka, AWS kinesis
+    - multiple types of consumers reading the message queue
+    - eg in case of above example lets say the API notifies the message queue with an update, the message is consumed by multiple consumers
+    - lets say we have two consumers:
+        - search consumer: updates the elastic search engine
+        - counter consumer: updates the database
+    - the consumer iterates over the messages in the queue and pulls the message
+
+### Kafka Essentials
+- Most popular apache project
+- kafka is a message stream that holds the messages
+- internal structure of kafka:
+    - Internally kafka has topic (which has a name)
+    - every topic has n partitions (every message is sent to the partition based on the partitioning key lets say user_id) -- this is based on hashing mechanism (hash function is deterministic)
+    - message is sent to a topic
+    - and depending on configured hash key it is put in the partition
+    ## Within partition messages are ordered (but no guarantee in ordering across partitions)
+
+## limitations of Kafka
+- No. of consumers = No. of partitions (one to one mapping)
+- parallelism is limited due to this
+
+- when done with reading certain amount of messages, consumer can commit and kafka will store that commit. so next time when the consumer restarts it starts with the previous commit (kind of log based)
+
+
+- Does the kafka store every single message ever received?
+    - theoritcally it can but one needs to send deletion policy (using a cron job)
+
+- every consumer can consume the message at their own pace
+
+### Pubsub
+- Both message streams and brokers pull the message out from the broker/message queue
+- Pubsub says why should you pull if I can push
+
+- What if I want 0 lag and low latency?
+- realtime pub sub solves this issue (eg redis pubsub)
+
+- instead of consumers pulling the message, message is pushed to them
+- on redis, one can subscribe to a channel whenever a publisher publishes on that channel, subscribers get the data immediately
+- things delivered really fast to a subscriber, low latency info
+
+- Practical uses: Message broadcast, configuration push
+
+- eg lets say servers are connected to pubsub and when one of the servers changes the configuration, it pushes an event to redis pubsub, sent to all the servers and all of them can handle it
+- proactive communication between servers
+
+- limitation of redis pubsub: nothing is buffered
