@@ -67,10 +67,19 @@
     - message is sent to a topic
     - and depending on configured hash key it is put in the partition
     ## Within partition messages are ordered (but no guarantee in ordering across partitions)
-
+- Append only commit log
+- performance
+- distributed
+- long polling - make a request and wait for some amounts of bytes for pull to happen (limit can be set)
+- event driven, pub sub and queue
+- scaling
+- parallel processing
 ## limitations of Kafka
 - No. of consumers = No. of partitions (one to one mapping)
 - parallelism is limited due to this
+- zookeeper (behaves weird when we scale) - if its down then it bring the entire system on its knees
+- producer explicit partition can lead to problems (increases complexity for the consumers)
+- complex to install, configure and manage
 
 - when done with reading certain amount of messages, consumer can commit and kafka will store that commit. so next time when the consumer restarts it starts with the previous commit (kind of log based)
 
@@ -79,6 +88,12 @@
     - theoritcally it can but one needs to send deletion policy (using a cron job)
 
 - every consumer can consume the message at their own pace
+
+Commands to spin up Zookeeper on docker
+docker run --name zookeeper -p 2181:2181 zookeeper
+
+Commands to spin up Kafka on docker
+docker run -p 9092:9092 --name kafka  -e KAFKA_ZOOKEEPER_CONNECT=192.168.1.67:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.1.67:9092 -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 -d confluentinc/cp-kafka
 
 ### Pubsub
 - Both message streams and brokers pull the message out from the broker/message queue
@@ -97,3 +112,6 @@
 - proactive communication between servers
 
 - limitation of redis pubsub: nothing is buffered
+
+Points to remember:
+    - you have to be okay with eventual consistency
