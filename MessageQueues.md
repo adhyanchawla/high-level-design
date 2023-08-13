@@ -113,5 +113,6 @@ docker run -p 9092:9092 --name kafka  -e KAFKA_ZOOKEEPER_CONNECT=192.168.1.67:21
 
 - limitation of redis pubsub: nothing is buffered
 
-Points to remember:
-    - you have to be okay with eventual consistency
+## Points to remember:
+- you have to be okay with eventual consistency
+
